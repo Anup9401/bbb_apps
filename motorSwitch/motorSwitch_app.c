@@ -23,36 +23,19 @@ typedef struct {
 int fd_dir=-1;
 thread_switch *sw1_param=NULL, *sw2_param=NULL;
 
-void fileReadWrite(int fd, char *val, int len, int op){
-
-	lseek(fd,0,SEEK_SET);
-	if(op==0){
-		if(read(fd, val, len)==-1){
-			perror("read() operation");
-			raise(2);
-		}
-
-	}
-	else if(op==1){
-		if(write(fd, val, len)==-1){
-			perror("write() operation");
-			raise(2);
-		}
-		if(fdatasync(fd)==-1){
-			perror("fdatasync() operation");
-			raise(2);
-		}
-	}
-}
-
 void closeFile(int fd, int clear){
 
-	if(fd!=-1){
-		if(clear){
-			fileReadWrite(fd, "0", 1, 1);
-		}
-		close(fd);
-	}
+        if(fd!=-1){
+                if(clear){
+                        if(write(fd, "0", 1)==-1){
+                                perror("write() clear");
+                        }
+                        if(fdatasync(fd)==-1){
+                                perror("fdatasync() clear");
+                        }
+                }
+                close(fd);
+        }
 }
 
 void cleanup(){
@@ -94,6 +77,28 @@ void signalHandler(int signal){
 		printf("caught signal, exiting\n");
 		exit(0);
 	}
+}
+
+void fileReadWrite(int fd, char *val, int len, int op){
+
+        lseek(fd,0,SEEK_SET);
+        if(op==0){
+                if(read(fd, val, len)==-1){
+                        perror("read() operation");
+                        raise(2);
+                }
+
+        }
+        else if(op==1){
+                if(write(fd, val, len)==-1){
+                        perror("write() operation");
+                        raise(2);
+                }
+                if(fdatasync(fd)==-1){
+                        perror("fdatasync() operation");
+                        raise(2);
+                }
+        }
 }
 
 void strcatString(char *s1, char *s2){
